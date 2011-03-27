@@ -1,16 +1,4 @@
-"""
-Simple web search engine - this file contains crawler and index.
-
-Heavily inspired by chapter 4 of the excellent 'Programming Collective
-Intelligence' by Toby Segaran (O'Reilly).
-
-This example uses open source software to get the job done:
-
-(1) BeautifulSoup to do the dirtly html parsing.
-http://www.crummy.com/software/BeautifulSoup/
-(2) Pysqlite for storing the index in a relational database on disk.
-http://code.google.com/p/pysqlite/
-"""
+"""Simple web search engine - this file contains crawler and index."""
 
 import BeautifulSoup
 import urllib2
