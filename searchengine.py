@@ -5,6 +5,7 @@ from pysqlite2 import dbapi2
 import re
 import urllib2
 import urlparse
+import sys
 
 """Complied regex used to identify words."""
 SPLITTER = re.compile('\\W*')
@@ -12,7 +13,6 @@ SPLITTER = re.compile('\\W*')
 STOP_WORDS = {'the':1, 'of':1, 'to':1, 'and':1, 'a':1, 'in':1, 'is':1, 'it':1}
 
 class Crawler(object):
-
 
   def __init__(self, db_name):
     self.db_connection = dbapi2.connect(db_name)
@@ -130,10 +130,10 @@ class Crawler(object):
     self.DbCommit()
 
 def __main__():
-  page_list = ['http://kiwitobes.com/wiki/Perl.html', 'http://www.google.com',
-               'http://www.yahoo.com']
-  crawler = Crawler('')
-  crawler.Crawl(page_list)
+  page_list = ['http://www.wikipedia.org/', 'http://www.dmoz.org/']
+  crawler = Crawler('searchindex.db')
+  crawler.CreateIndexTables()
+  crawler.Crawl(page_list, 1)
 
 if __name__ == '__main__':
   __main__()
