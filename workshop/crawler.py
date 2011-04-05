@@ -4,16 +4,19 @@ import BeautifulSoup
 import re
 import urllib2
 import urlparse
+import sys
 
 """Complied regex used to identify words."""
 SPLITTER = re.compile('\\W*')
 """List of words to ignore."""
 STOP_WORDS = {'the':1, 'of':1, 'to':1, 'and':1, 'a':1, 'in':1, 'is':1, 'it':1}
+"""List of html tags to ignore."""
+STOP_TAGS = ['script', 'style']
 
 class RawTextCrawler(object):
 
   def __init__(self):
-    self.url_and_text = []
+    self.url_title_text = []
 
   def GetTextOnly(self, soup):
     """Extract pure text content from an HTML soup."""
@@ -23,8 +26,9 @@ class RawTextCrawler(object):
         sub_text = self.GetTextOnly(content)
         result_text += sub_text + '\n'
       return result_text
-    else:
+    elif not hasattr(soup, 'name') or soup.name not in STOP_TAGS:
       return soup.string.strip()
+    return ''
 
   def SeparateWords(self, text):
     """Separate the words in text."""
@@ -36,14 +40,19 @@ class RawTextCrawler(object):
     return False
 
   def AddUrlAndText(self, url, html_soup):
+    if html_soup('title'):
+      title = html_soup('title')[0].string
+    else:
+      title = ''
     words = self.SeparateWords(self.GetTextOnly(html_soup))
     words = filter(lambda w: w not in STOP_WORDS, words)
-    self.url_and_text.append((url, reduce(lambda w1,w2: w1 + ' ' + w2, words, '')))
+    self.url_title_text.append((url, title, reduce(lambda w1,w2: w1 + ' ' + w2, words, '')))
 
   def DumpUrlAndText(self):
-    print len(self.url_and_text)
-    for url, text in self.url_and_text:
+    print len(self.url_title_text)
+    for url, title, text in self.url_title_text:
       print url
+      print title
       print text
 
   def Crawl(self, pages, depth=2):
@@ -55,7 +64,10 @@ class RawTextCrawler(object):
         try:
           connection = urllib2.urlopen(page)
         except urllib2.URLError:
-          print 'Could not open %s' % page
+          sys.stderr.write('[urllib2.URLError] Could not open %s\n' % page)
+          continue
+        except:
+          sys.stderr.write('Unexpected error: %s\n' % sys.exc_info()[0])
           continue
         html_soup = BeautifulSoup.BeautifulSoup(connection.read())
         self.AddUrlAndText(page, html_soup)
@@ -72,11 +84,23 @@ class RawTextCrawler(object):
       # Go on with new pages.
       pages = new_pages
 
+
+def AcceptQueries():
+  try:
+    query = raw_input()
+    while query:
+      print query
+      query = raw_input()
+    print
+  except EOFError:
+    print
+
 def __main__():
   page_list = ['http://www.dmoz.org/', 'http://dir.yahoo.com/']
   crawler = RawTextCrawler()
   crawler.Crawl(page_list, 1)
   crawler.DumpUrlAndText()
+  AcceptQueries()
 
 if __name__ == '__main__':
   __main__()
