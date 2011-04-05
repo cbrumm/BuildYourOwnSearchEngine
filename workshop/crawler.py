@@ -1,4 +1,4 @@
-"""Simple web search engine - this file contains version for the workshop."""
+"""Simple web crawler - this file contains version for the workshop."""
 
 import BeautifulSoup
 import re
